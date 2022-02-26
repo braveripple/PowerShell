@@ -3,9 +3,9 @@ $result = ""
 $first = $true
 $Args | 
     Where-Object { Test-Path -LiteralPath $_ } | 
-    Get-ChildItem | 
+    ForEach-Object { Get-Item -LiteralPath $_ } | 
     Sort-Object -Property Name | 
-    ForEach-Object { 
+    ForEach-Object {
         if ($first) {
             $result += "ディレクトリ名:$($_.Directory.FullName)`n" 
             $first = $false
