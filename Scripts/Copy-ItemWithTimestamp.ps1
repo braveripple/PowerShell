@@ -22,13 +22,14 @@ param (
 
     [Parameter(Mandatory = $False)]
     [string]
-    $Destination
+    $Destination = $null
 )
 begin {
     $timestamp = (Get-Date).ToString($Format)
-    if ($null -ne $Destination) {
+    if ($null -ne $PSBoundParameters.Destination) {
         if (!(Test-Path -LiteralPath $Destination -PathType Container)) {
             # コピー先が指定されている場合、コピー先のディレクトリが存在しない場合エラー
+            throw "Destination Path '${Destination}' is not exists."
         }
     }
 }
@@ -44,8 +45,8 @@ process {
             If (Test-Path -LiteralPath $_ -PathType Any) {
                 $file = Get-Item -LiteralPath $_
                 # コピー先の設定
-                if ($null -eq $Destination) {
-                    $folder = $file.Directory.FullName
+                if ($null -eq $PSBoundParameters.Destination) {
+                    $folder = Split-Path -Path $file -Parent
                 } else {
                     $folder = $Destination
                 }
