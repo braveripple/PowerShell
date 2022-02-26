@@ -40,6 +40,8 @@ $iconMap = @{
     "🌟"="%SystemRoot%\System32\shell32.dll,208";
     "🕒"="%SystemRoot%\System32\shell32.dll,20";
     "📋"="%SystemRoot%\System32\shell32.dll,260";
+    "💼"="%SystemRoot%\System32\shell32.dll,20";
+    "💾"="%SystemRoot%\System32\shell32.dll,258";
     "PowerShell"=$PowerShellPath
 }
 
@@ -73,6 +75,13 @@ $scriptInfo = @(
         PowerShellWindowStyle=[WindowStyle]::Hidden
     },
     [PSCustomObject]@{
+        Name="タイムスタンプを付与してバックアップ"
+        Path=".\CopyItemWithTimestampToBackupDirectory.ps1"
+        Icon="💾"
+        WindowStyle=[WindowStyle]::Hidden
+        PowerShellWindowStyle=[WindowStyle]::Hidden
+    },
+    [PSCustomObject]@{
         Name="タイムスタンプを付与してリネーム"
         Path=".\RenameItemWithTimestamp.ps1"
         Icon="🕒"
@@ -95,10 +104,12 @@ $scriptInfo = @(
     }
 )
 
+$scriptPath = Split-Path -Parent $PSCommandPath
+
 $scriptInfo | ForEach-Object {
     $parameter = @{
         name = $_.Name
-        scriptPath = (Get-Item $_.Path | Select-Object -ExpandProperty FullName)
+        scriptPath = (Get-Item -Path (Join-Path -Path $scriptPath -ChildPath $_.Path) | Select-Object -ExpandProperty FullName)
         windowStyle = $_.WindowStyle
         iconLocation = $iconMap[$_.Icon]
         powershellWindowStyle = $_.PowerShellWindowStyle
