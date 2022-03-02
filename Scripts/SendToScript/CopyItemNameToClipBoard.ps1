@@ -7,7 +7,8 @@ $Args |
     Sort-Object -Property Name | 
     ForEach-Object {
         if ($first) {
-            $result += "ディレクトリ名:$($_.Directory.FullName)`n" 
+            # アイテムがあるディレクトリ名を先頭に出力する
+            $result += "$($_.Directory.FullName)`n" 
             $first = $false
         }
         $result += "* $($_.Name)`n"
