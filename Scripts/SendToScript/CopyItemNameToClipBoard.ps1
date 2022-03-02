@@ -8,7 +8,8 @@ $Args |
     ForEach-Object {
         if ($first) {
             # アイテムがあるディレクトリ名を先頭に出力する
-            $result += "$($_.Directory.FullName)`n" 
+            $directoryPath = Split-Path -Path $_ -Parent
+            $result += "$($directoryPath)`n" 
             $first = $false
         }
         $result += "* $($_.Name)`n"
