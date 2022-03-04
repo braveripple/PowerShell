@@ -15,8 +15,25 @@ param (
     [string[]]$LiteralPath,
 
     [Parameter(Mandatory = $False)]
-    [switch]$NoCreate
+    [switch]$NoCreate,
+
+    [Parameter(Mandatory = $False)]
+    [string]$Reference
 )
+begin {
+    if ($Reference) {
+        if (!(Test-Path -LiteralPath $Reference -PathType Any)) {
+            throw "failed to get attlibutes of '${Reference}': No such file or directory"
+        }
+        $referenceFile = Get-Item -LiteralPath $Reference
+        $lastWriteTime = $referenceFile.LastWriteTime
+        $lastAccessTime = $referenceFile.LastAccessTime
+    } else {
+        $timestamp = Get-Date
+        $lastWriteTime = $timestamp
+        $lastAccessTime = $timestamp
+    }
+}
 process {
     $targets = @()
     if ($PSBoundParameters.ContainsKey('Path')) {
@@ -58,10 +75,9 @@ process {
     $targets | Foreach-Object {
         if ($PSCmdlet.ShouldProcess($_, 'touch')) {
             If (Test-Path -LiteralPath $_ -PathType Any) {
-                $date = Get-Date
                 $file = (Get-Item -LiteralPath $_)
-                $file.LastWriteTime = $date
-                $file.LastAccessTime = $date
+                $file.LastWriteTime = $lastWriteTime
+                $file.LastAccessTime = $lastAccessTime
                 $file
             } else {
                 if($NoCreate) {
