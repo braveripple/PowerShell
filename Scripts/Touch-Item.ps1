@@ -32,7 +32,7 @@ param (
 
 )
 begin {
-    if ($Reference) {
+    if ($PSBoundParameters.ContainsKey('Reference')) {
         if (!(Test-Path -LiteralPath $Reference -PathType Any)) {
             throw "failed to get attlibutes of '${Reference}': No such file or directory"
         }
