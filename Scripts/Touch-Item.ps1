@@ -47,7 +47,7 @@ begin {
         $creationTime = $timestamp
     }
 
-    if ((!$AccessTimeUpdate) -and (!$WriteTimeUpdate) -and(!$CreationTimeUpdate)) {
+    if ((!$AccessTimeUpdate) -and (!$WriteTimeUpdate) -and (!$CreationTimeUpdate)) {
         $AccessTimeUpdate = $True
         $WriteTimeUpdate = $True
     }
@@ -118,7 +118,17 @@ process {
             } else {
                 if($NoCreate) {
                 } else {
-                    New-Item -Path $_ -ItemType File
+                    $file = New-Item -Path $_ -ItemType File
+                    if ($AccessTimeUpdate) {
+                        $file.LastAccessTime = $lastAccessTime
+                    }
+                    if ($WriteTimeUpdate) {
+                        $file.LastWriteTime = $lastWriteTime
+                    }
+                    if ($CreationTimeUpdate) {
+                        $file.CreationTime = $creationTime
+                    }
+                    $file
                 }
             }
         }
