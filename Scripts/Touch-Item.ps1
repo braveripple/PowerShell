@@ -25,7 +25,11 @@ param (
 
     [Alias('ModifyTimeUpdate')]
     [Parameter()]
-    [switch]$WriteTimeUpdate
+    [switch]$WriteTimeUpdate,
+
+    [Parameter()]
+    [switch]$CreationTimeUpdate
+
 )
 begin {
     if ($Reference) {
@@ -35,23 +39,29 @@ begin {
         $referenceFile = Get-Item -LiteralPath $Reference
         $lastWriteTime = $referenceFile.LastWriteTime
         $lastAccessTime = $referenceFile.LastAccessTime
+        $creationTime = $referenceFile.CreationTime
     } else {
         $timestamp = Get-Date
         $lastWriteTime = $timestamp
         $lastAccessTime = $timestamp
+        $creationTime = $timestamp
     }
 
-    if ((!$AccessTimeUpdate) -and (!$WriteTimeUpdate)) {
+    if ((!$AccessTimeUpdate) -and (!$WriteTimeUpdate) -and(!$CreationTimeUpdate)) {
         $AccessTimeUpdate = $True
         $WriteTimeUpdate = $True
     }
-    
+
     if ($AccessTimeUpdate) {
         Write-Debug "AccessTimeUpdate:$($lastAccessTime.ToString('yyyy/MM/dd HH:mm:ss'))"
     }
     if ($WriteTimeUpdate) {
         Write-Debug "WriteTimeUpdate:$($lastWriteTime.ToString('yyyy/MM/dd HH:mm:ss'))"
     }
+    if ($CreationTimeUpdate) {
+        Write-Debug "CreationTimeUpdate:$($creationTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+    }
+
 }
 process {
     $targets = @()
@@ -100,6 +110,9 @@ process {
                 }
                 if ($WriteTimeUpdate) {
                     $file.LastWriteTime = $lastWriteTime
+                }
+                if ($CreationTimeUpdate) {
+                    $file.CreationTime = $creationTime
                 }
                 $file
             } else {
