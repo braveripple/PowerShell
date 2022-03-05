@@ -34,7 +34,9 @@ param (
     [datetime]$DateTime
 )
 begin {
-    if ($PSBoundParameters.ContainsKey('Reference')) {
+    if ($PSBoundParameters.ContainsKey('Reference') -and $PSBoundParameters.ContainsKey('DateTime')) {
+        throw "cannot specify times from more than one source"
+    } elseif ($PSBoundParameters.ContainsKey('Reference')) {
         if (!(Test-Path -LiteralPath $Reference -PathType Any)) {
             throw "failed to get attlibutes of '${Reference}': No such file or directory"
         }
@@ -42,17 +44,15 @@ begin {
         $lastWriteTime = $referenceFile.LastWriteTime
         $lastAccessTime = $referenceFile.LastAccessTime
         $creationTime = $referenceFile.CreationTime
+    } elseif ($PSBoundParameters.ContainsKey('DateTime')) {
+        $lastWriteTime = $DateTime
+        $lastAccessTime = $DateTime
+        $creationTime = $DateTime
     } else {
         $timestamp = Get-Date
         $lastWriteTime = $timestamp
         $lastAccessTime = $timestamp
         $creationTime = $timestamp
-    }
-
-    if ($PSBoundParameters.ContainsKey('DateTime')) {
-        $lastWriteTime = $DateTime
-        $lastAccessTime = $DateTime
-        $creationTime = $DateTime
     }
 
     if ((!$AccessTimeUpdate) -and (!$WriteTimeUpdate) -and (!$CreationTimeUpdate)) {
