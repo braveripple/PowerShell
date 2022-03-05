@@ -14,11 +14,18 @@ param (
         ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True)]
     [string[]]$LiteralPath,
 
-    [Parameter(Mandatory = $False)]
+    [Parameter()]
     [switch]$NoCreate,
 
-    [Parameter(Mandatory = $False)]
-    [string]$Reference
+    [Parameter()]
+    [string]$Reference,
+
+    [Parameter()]
+    [switch]$AccessTimeUpdate,
+
+    [Alias('ModifyTimeUpdate')]
+    [Parameter()]
+    [switch]$WriteTimeUpdate
 )
 begin {
     if ($Reference) {
@@ -32,6 +39,18 @@ begin {
         $timestamp = Get-Date
         $lastWriteTime = $timestamp
         $lastAccessTime = $timestamp
+    }
+
+    if ((!$AccessTimeUpdate) -and (!$WriteTimeUpdate)) {
+        $AccessTimeUpdate = $True
+        $WriteTimeUpdate = $True
+    }
+    
+    if ($AccessTimeUpdate) {
+        Write-Debug "AccessTimeUpdate:$($lastAccessTime.ToString('yyyy/MM/dd HH:mm:ss'))"
+    }
+    if ($WriteTimeUpdate) {
+        Write-Debug "WriteTimeUpdate:$($lastWriteTime.ToString('yyyy/MM/dd HH:mm:ss'))"
     }
 }
 process {
@@ -76,8 +95,12 @@ process {
         if ($PSCmdlet.ShouldProcess($_, 'touch')) {
             If (Test-Path -LiteralPath $_ -PathType Any) {
                 $file = (Get-Item -LiteralPath $_)
-                $file.LastWriteTime = $lastWriteTime
-                $file.LastAccessTime = $lastAccessTime
+                if ($AccessTimeUpdate) {
+                    $file.LastAccessTime = $lastAccessTime
+                }
+                if ($WriteTimeUpdate) {
+                    $file.LastWriteTime = $lastWriteTime
+                }
                 $file
             } else {
                 if($NoCreate) {
