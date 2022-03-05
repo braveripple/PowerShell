@@ -28,8 +28,10 @@ param (
     [switch]$WriteTimeUpdate,
 
     [Parameter()]
-    [switch]$CreationTimeUpdate
+    [switch]$CreationTimeUpdate,
 
+    [Parameter()]
+    [datetime]$DateTime
 )
 begin {
     if ($PSBoundParameters.ContainsKey('Reference')) {
@@ -45,6 +47,12 @@ begin {
         $lastWriteTime = $timestamp
         $lastAccessTime = $timestamp
         $creationTime = $timestamp
+    }
+
+    if ($PSBoundParameters.ContainsKey('DateTime')) {
+        $lastWriteTime = $DateTime
+        $lastAccessTime = $DateTime
+        $creationTime = $DateTime
     }
 
     if ((!$AccessTimeUpdate) -and (!$WriteTimeUpdate) -and (!$CreationTimeUpdate)) {
