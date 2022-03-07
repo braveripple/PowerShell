@@ -30,6 +30,7 @@ param (
     [Parameter()]
     [switch]$CreationTimeUpdate,
 
+    [Alias('Timestamp')]
     [Parameter()]
     [datetime]$DateTime
 )
