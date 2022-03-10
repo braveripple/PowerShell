@@ -18,11 +18,15 @@ param (
 
     [Parameter(Mandatory = $False)]
     [string]
-    $Format = "yyyyMMddHHmmss"
+    $Format = "yyyyMMddHHmmss",
 
+    [Parameter(Mandatory = $False)]
+    [ValidateSet("CurrentTime","WriteTime","AccessTime","CreationTime")]
+    [string]
+    $TimestampType = "CurrentTime"
 )
 begin {
-    $timestamp = (Get-Date).ToString($Format)
+    $currentTime = (Get-Date).ToString($Format)
 }
 process {
     if ($PSBoundParameters.ContainsKey('Path')) {
@@ -35,6 +39,16 @@ process {
         if ($PSCmdlet.ShouldProcess($_)) {
             If (Test-Path -LiteralPath $_ -PathType Any) {
                 $file = Get-Item -LiteralPath $_
+                # タイムスタンプの種類
+                if ($TimestampType -eq "CurrentTime") {
+                    $timestamp = $currentTime
+                } elseif ($TimestampType -eq "WriteTime") {
+                    $timestamp = $file.LastWriteTime.ToString($Format)
+                } elseif ($TimestampType -eq "AccessTime") {
+                    $timestamp = $file.LastAccessTime.ToString($Format)
+                } elseif ($TimestampType -eq "CreationTime") {
+                    $timestamp = $file.CreationTime.ToString($Format)
+                }
                 # コピーファイルパスの作成
                 $new_file_path = [System.IO.Path]::Combine(
                     $file.Directory.FullName, 

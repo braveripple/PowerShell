@@ -22,10 +22,15 @@ param (
 
     [Parameter(Mandatory = $False)]
     [string]
-    $Destination = $null
+    $Destination = $null,
+
+    [Parameter(Mandatory = $False)]
+    [ValidateSet("CurrentTime","WriteTime","AccessTime","CreationTime")]
+    [string]
+    $TimestampType = "CurrentTime"
 )
 begin {
-    $timestamp = (Get-Date).ToString($Format)
+    $currentTime = (Get-Date).ToString($Format)
     if ($null -ne $PSBoundParameters.Destination) {
         if (!(Test-Path -LiteralPath $Destination -PathType Container)) {
             # コピー先が指定されている場合、コピー先のディレクトリが存在しない場合エラー
@@ -49,6 +54,16 @@ process {
                     $folder = Split-Path -Path $file -Parent
                 } else {
                     $folder = $Destination
+                }
+                # タイムスタンプの種類
+                if ($TimestampType -eq "CurrentTime") {
+                    $timestamp = $currentTime
+                } elseif ($TimestampType -eq "WriteTime") {
+                    $timestamp = $file.LastWriteTime.ToString($Format)
+                } elseif ($TimestampType -eq "AccessTime") {
+                    $timestamp = $file.LastAccessTime.ToString($Format)
+                } elseif ($TimestampType -eq "CreationTime") {
+                    $timestamp = $file.CreationTime.ToString($Format)
                 }
                 # コピーファイルパスの作成
                 $new_file_path = [System.IO.Path]::Combine(
