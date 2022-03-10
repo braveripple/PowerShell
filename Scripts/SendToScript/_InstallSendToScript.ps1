@@ -75,15 +75,22 @@ $scriptInfo = @(
         PowerShellWindowStyle=[WindowStyle]::Hidden
     },
     [PSCustomObject]@{
-        Name="タイムスタンプを付与してバックアップ"
-        Path=".\CopyItemWithTimestampToBackupDirectory.ps1"
-        Icon="💾"
+        Name="タイムスタンプを付与してリネーム"
+        Path=".\RenameItemWithTimestamp.ps1"
+        Icon="🕒"
         WindowStyle=[WindowStyle]::Hidden
         PowerShellWindowStyle=[WindowStyle]::Hidden
     },
     [PSCustomObject]@{
-        Name="タイムスタンプを付与してリネーム"
-        Path=".\RenameItemWithTimestamp.ps1"
+        Name="更新日時を付与してコピー"
+        Path=".\CopyItemWithWriteTime.ps1"
+        Icon="🕒"
+        WindowStyle=[WindowStyle]::Hidden
+        PowerShellWindowStyle=[WindowStyle]::Hidden
+    },
+    [PSCustomObject]@{
+        Name="更新日時を付与してリネーム"
+        Path=".\RenameItemWithWriteTime.ps1"
         Icon="🕒"
         WindowStyle=[WindowStyle]::Hidden
         PowerShellWindowStyle=[WindowStyle]::Hidden
@@ -101,6 +108,13 @@ $scriptInfo = @(
         Icon="🔍"
         WindowStyle=[WindowStyle]::Hidden
         PowerShellWindowStyle=[WindowStyle]::Normal
+    },
+    [PSCustomObject]@{
+        Name="タイムスタンプを付与してバックアップ"
+        Path=".\CopyItemWithTimestampToBackupDirectory.ps1"
+        Icon="💾"
+        WindowStyle=[WindowStyle]::Hidden
+        PowerShellWindowStyle=[WindowStyle]::Hidden
     }
 )
 
