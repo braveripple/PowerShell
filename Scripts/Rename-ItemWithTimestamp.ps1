@@ -21,9 +21,17 @@ param (
     $Format = "yyyyMMddHHmmss",
 
     [Parameter(Mandatory = $False)]
+    [string]
+    $Prefix = "_",
+
+    [Parameter(Mandatory = $False)]
     [ValidateSet("CurrentTime","WriteTime","AccessTime","CreationTime")]
     [string]
-    $TimestampType = "CurrentTime"
+    $TimestampType = "CurrentTime",
+
+    [Parameter(Mandatory = $False)]
+    [switch]
+    $OverWrite
 )
 begin {
     $currentTime = (Get-Date).ToString($Format)
@@ -49,10 +57,16 @@ process {
                 } elseif ($TimestampType -eq "CreationTime") {
                     $timestamp = $file.CreationTime.ToString($Format)
                 }
+                if ($OverWrite) {
+                    $filename = (& "${PSScriptRoot}/Remove-Timestamp.ps1" $file.Name -Format $Format -Prefix $Prefix)
+                    $filebase = Split-Path -LeafBase $filename
+                } else {
+                    $filebase = $file.BaseName
+                }
                 # コピーファイルパスの作成
                 $new_file_path = [System.IO.Path]::Combine(
                     $file.Directory.FullName, 
-                    $file.BaseName + "_" + $timestamp + $file.Extension
+                    $filebase + $Prefix + $timestamp + $file.Extension
                 )
                 Rename-Item -LiteralPath $_ -NewName $new_file_path
             }
