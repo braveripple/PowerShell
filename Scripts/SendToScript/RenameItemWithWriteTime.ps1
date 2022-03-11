@@ -2,4 +2,9 @@
 $resolvePaths = foreach ($arg in $Args) {
     Get-Item -LiteralPath $arg
 }
-$resolvePaths | ../Rename-ItemWithTimestamp.ps1 -Format "yyyyMMddHHmmss" -TimestampType WriteTime
+$resolvePaths | 
+    ../Rename-ItemWithTimestamp.ps1 `
+        -Format "yyyyMMddHHmmss" `
+        -Prefix "_" `
+        -TimestampType WriteTime `
+        -OverWrite
