@@ -1,3 +1,78 @@
+<#PSScriptInfo
+
+.VERSION 1.0
+
+.GUID c6ff2af7-aa1a-464e-be13-090393906847
+
+.AUTHOR braveripple
+
+.COMPANYNAME
+
+.COPYRIGHT © 2022 braveripple
+
+.TAGS touch
+
+.LICENSEURI
+
+.PROJECTURI https://github.com/braveripple/PowerShell
+
+.ICONURI
+
+.EXTERNALMODULEDEPENDENCIES
+
+.REQUIREDSCRIPTS
+
+.EXTERNALSCRIPTDEPENDENCIES
+
+.RELEASENOTES
+Version 1.0:  ドキュメントを作成
+
+.PRIVATEDATA
+
+#>
+
+<#
+.SYNOPSIS
+ファイルのタイムスタンプを変更する
+
+.DESCRIPTION
+ファイルの作成日時、更新日時、アクセス日時を更新する。
+パラメーターを何も指定しない場合は更新日時とアクセス日時を現在の日時で更新する。
+ファイルが存在しない場合はファイルを作成する。
+このコマンドレットのパラメーターはGNU版touchを踏襲している。
+
+.PARAMETER Path
+.PARAMETER LiteralPath
+.PARAMETER NoCreate
+ファイルが存在しない場合、ファイルを作成しない。
+.PARAMETER Reference
+指定したファイルの日時を使ってファイルのタイムスタンプを変更する。
+.PARAMETER AccessTimeUpdate
+アクセス日時を変更する。
+.PARAMETER WriteTimeUpdate
+更新日時を変更する。
+.PARAMETER CreationTimeUpdate
+作成日時を変更する。
+.PARAMETER DateTime
+指定したDateTimeオブジェクトの日時を使ってファイルのタイムスタンプを変更する
+
+.EXAMPLE
+Touch-Item.ps1 test.txt
+'test.txt'のアクセス日時と更新日時を現在時刻で更新する。
+'test.txt'が存在しない場合はファイルを作成する。
+
+.EXAMPLE
+Touch-Item.ps1 test.txt -DateTime (Get-Date "2020/03/14 11:22:33")
+'test.txt'のアクセス日時と更新日時を"2020/03/14 11:22:33"で更新する。
+'test.txt'が存在しない場合はファイルを作成する。
+
+.EXAMPLE
+Touch-Item.ps1 test.txt -Reference test2.txt
+'test.txt'のアクセス日時と更新日時を'test2.txt'のアクセス日時と更新日時で更新する。
+'test.txt'が存在しない場合はファイルを作成する。
+
+#>
+
 [CmdletBinding(
     SupportsShouldProcess,
     DefaultParameterSetName = 'Path'
