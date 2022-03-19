@@ -42,21 +42,42 @@ begin {
     if ($null -ne $PSBoundParameters.Destination) {
         if (!(Test-Path -LiteralPath $Destination -PathType Container)) {
             # コピー先が指定されている場合、コピー先のディレクトリが存在しない場合エラー
-            throw "Destination Path '${Destination}' is not exists."
+            Write-Error "Access to the path '$Destination' is denied."
+            exit 1
         }
     }
 }
 process {
     if ($PSBoundParameters.ContainsKey('Path')) {
-        $targets = Convert-Path -Path $Path
+        $InputPath = $Path
     }
     else {
-        $targets = Convert-Path -LiteralPath $LiteralPath
+        $InputPath = $LiteralPath
     }
-    $targets | Foreach-Object {
-        if ($PSCmdlet.ShouldProcess($_)) {
-            If (Test-Path -LiteralPath $_ -PathType Any) {
-                $file = Get-Item -LiteralPath $_
+    foreach ($p in $InputPath) {
+        $targets = @()
+        try {
+            if ($PSBoundParameters.ContainsKey('Path')) {
+                $targets = Convert-Path -Path $p -ErrorAction Stop
+            }
+            else {
+                $targets = Convert-Path -LiteralPath $p -ErrorAction Stop
+            }
+        } catch {
+            Write-Error $_.Exception.Message -ErrorAction Continue
+            if ($ErrorActionPreference -eq "Stop") {
+                return
+            }
+        }
+        foreach ($target in $targets) {
+            $file = Get-Item -LiteralPath $target
+            $processName = if ($file.PSIsContainer) { 
+                "Copy Directory with Timestamp"
+            } else {
+                "Copy File with Timestamp"
+            }
+            if ($PSCmdlet.ShouldProcess($target, $processName)) {
+                
                 # コピー先の設定
                 if ($null -eq $PSBoundParameters.Destination) {
                     $folder = Split-Path -Path $file -Parent
@@ -73,6 +94,7 @@ process {
                 } elseif ($TimestampType -eq "CreationTime") {
                     $timestamp = $file.CreationTime.ToString($Format)
                 }
+                # ファイル名の既存のタイムスタンプの上書き
                 if ($OverWrite) {
                     $filename = (& "${PSScriptRoot}/Remove-Timestamp.ps1" $file.Name -Format $Format -Prefix $Prefix)
                     $filebase = Split-Path -LeafBase $filename
@@ -84,7 +106,7 @@ process {
                     $folder, 
                     $filebase + $Prefix + $timestamp + $file.Extension
                 )
-                Copy-Item -LiteralPath $_ $new_file_path -Recurse
+                Copy-Item -LiteralPath $target $new_file_path -Recurse
             }
         }
     }
