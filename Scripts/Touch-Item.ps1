@@ -112,7 +112,8 @@ param (
 begin {
     if ($PSBoundParameters.ContainsKey('Reference') -and $PSBoundParameters.ContainsKey('DateTime')) {
         throw "cannot specify times from more than one source"
-    } elseif ($PSBoundParameters.ContainsKey('Reference')) {
+    }
+    elseif ($PSBoundParameters.ContainsKey('Reference')) {
         if (!(Test-Path -LiteralPath $Reference -PathType Any)) {
             throw "failed to get attlibutes of '${Reference}': No such file or directory"
         }
@@ -120,11 +121,13 @@ begin {
         $lastWriteTime = $referenceFile.LastWriteTime
         $lastAccessTime = $referenceFile.LastAccessTime
         $creationTime = $referenceFile.CreationTime
-    } elseif ($PSBoundParameters.ContainsKey('DateTime')) {
+    }
+    elseif ($PSBoundParameters.ContainsKey('DateTime')) {
         $lastWriteTime = $DateTime
         $lastAccessTime = $DateTime
         $creationTime = $DateTime
-    } else {
+    }
+    else {
         $timestamp = Get-Date
         $lastWriteTime = $timestamp
         $lastAccessTime = $timestamp
@@ -148,61 +151,46 @@ begin {
 
 }
 process {
-    $targets = @()
-    if ($PSBoundParameters.ContainsKey('Path')) {
-        Write-Debug "Path:${Path}"
-        $Path | ForEach-Object {
-            if (Test-Path -Path $_ -PathType Any) {
-                Write-Debug "P:$(${_}) is exist"
-                $targets += Convert-Path -Path $_
-            } else {
-                Write-Debug "P:$(${_}) is not exist"
-                $parent = Split-Path -Path $_ -Parent
-                $child = Split-Path -Path $_ -Leaf
-                if (Test-Path -LiteralPath $parent -PathType Container) {
-                    $targets += Join-Path -Path (Convert-Path $parent) -ChildPath $child
-                } else {
-                    $targets += Join-Path -Path (Get-Location) -ChildPath $child
-                }
+    $InputPath = if ($PSBoundParameters.ContainsKey('Path')) { $Path } else { $LiteralPath }
+    foreach ($p in $InputPath) {
+        $targets = @()
+        try {
+            if ($PSBoundParameters.ContainsKey('Path')) {
+                $targets = Convert-Path -Path $p -ErrorAction Stop
+            }
+            else {
+                $targets = Convert-Path -LiteralPath $p -ErrorAction Stop
+            }
+        } catch [System.Management.Automation.ItemNotFoundException] {
+            # itemが見つからない場合は新規ファイルを作成するため、絶対パスに変換する
+            $parent = Split-Path -Path $p -Parent
+            $child = Split-Path -Path $p -Leaf
+            if (Test-Path -LiteralPath $parent -PathType Container) {
+                $targets += Join-Path -Path (Convert-Path $parent) -ChildPath $child
+            }
+            else {
+                $targets += Join-Path -Path (Get-Location) -ChildPath $child
+            }
+        } catch {
+            Write-Error $_.Exception.Message -ErrorAction Continue
+            if ($ErrorActionPreference -eq "Stop") {
+                return
             }
         }
-    }
-    else {
-        Write-Debug "LiteralPath:${LiteralPath}"
-        $LiteralPath | ForEach-Object {
-            if (Test-Path -LiteralPath $_ -PathType Any) {
-                Write-Debug "LP:$(${_}) is exist."
-                $targets += Convert-Path -LiteralPath $_
+        foreach ($target in $targets) {
+            if (Test-Path -LiteralPath $target -PathType Any) {
+                $file = Get-Item -LiteralPath $target
+                $operation = "Change {0} Timestamp" -f $(if($file){ "File" }else{ "Directory" })
             } else {
-                Write-Debug "LP:$(${_}) is not exist."
-                $parent = Split-Path -Path $_ -Parent
-                $child = Split-Path -Path $_ -Leaf
-                if (Test-Path -LiteralPath $parent -PathType Container) {
-                    $targets += Join-Path -Path (Convert-Path $parent) -ChildPath $child
+                if ($NoCreate) {
+                    $operation = "Do Nothing (because -NoCreate is enabled)"
                 } else {
-                    $targets += Join-Path -Path (Get-Location) -ChildPath $child
+                    $operation = "Create File And Change Timestamp"
                 }
             }
-        }
-    }
-    $targets | Foreach-Object {
-        if ($PSCmdlet.ShouldProcess($_, 'touch')) {
-            If (Test-Path -LiteralPath $_ -PathType Any) {
-                $file = (Get-Item -LiteralPath $_)
-                if ($AccessTimeUpdate) {
-                    $file.LastAccessTime = $lastAccessTime
-                }
-                if ($WriteTimeUpdate) {
-                    $file.LastWriteTime = $lastWriteTime
-                }
-                if ($CreationTimeUpdate) {
-                    $file.CreationTime = $creationTime
-                }
-                $file
-            } else {
-                if($NoCreate) {
-                } else {
-                    $file = New-Item -Path $_ -ItemType File
+            if ($PSCmdlet.ShouldProcess($target, $operation)) {
+                If (Test-Path -LiteralPath $target -PathType Any) {
+                    $file = (Get-Item -LiteralPath $target)
                     if ($AccessTimeUpdate) {
                         $file.LastAccessTime = $lastAccessTime
                     }
@@ -213,6 +201,23 @@ process {
                         $file.CreationTime = $creationTime
                     }
                     $file
+                }
+                else {
+                    if ($NoCreate) {
+                    }
+                    else {
+                        $file = New-Item -Path $target -ItemType File
+                        if ($AccessTimeUpdate) {
+                            $file.LastAccessTime = $lastAccessTime
+                        }
+                        if ($WriteTimeUpdate) {
+                            $file.LastWriteTime = $lastWriteTime
+                        }
+                        if ($CreationTimeUpdate) {
+                            $file.CreationTime = $creationTime
+                        }
+                        $file
+                    }
                 }
             }
         }
