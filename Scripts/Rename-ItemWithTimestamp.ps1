@@ -25,7 +25,7 @@ param (
     $Prefix = "_",
 
     [Parameter(Mandatory = $False)]
-    [ValidateSet("CurrentTime","WriteTime","AccessTime","CreationTime")]
+    [ValidateSet("CurrentTime", "WriteTime", "AccessTime", "CreationTime")]
     [string]
     $TimestampType = "CurrentTime",
 
@@ -37,12 +37,7 @@ begin {
     $currentTime = (Get-Date).ToString($Format)
 }
 process {
-    if ($PSBoundParameters.ContainsKey('Path')) {
-        $InputPath = $Path
-    }
-    else {
-        $InputPath = $LiteralPath
-    }
+    $InputPath = if ($PSBoundParameters.ContainsKey('Path')) { $Path } else { $LiteralPath }
     foreach ($p in $InputPath) {
         $targets = @()
         try {
@@ -52,7 +47,8 @@ process {
             else {
                 $targets = Convert-Path -LiteralPath $p -ErrorAction Stop
             }
-        } catch {
+        }
+        catch {
             Write-Error $_.Exception.Message -ErrorAction Continue
             if ($ErrorActionPreference -eq "Stop") {
                 return
@@ -63,18 +59,22 @@ process {
             # タイムスタンプの種類
             if ($TimestampType -eq "CurrentTime") {
                 $timestamp = $currentTime
-            } elseif ($TimestampType -eq "WriteTime") {
+            }
+            elseif ($TimestampType -eq "WriteTime") {
                 $timestamp = $file.LastWriteTime.ToString($Format)
-            } elseif ($TimestampType -eq "AccessTime") {
+            }
+            elseif ($TimestampType -eq "AccessTime") {
                 $timestamp = $file.LastAccessTime.ToString($Format)
-            } elseif ($TimestampType -eq "CreationTime") {
+            }
+            elseif ($TimestampType -eq "CreationTime") {
                 $timestamp = $file.CreationTime.ToString($Format)
             }
             # ファイル名の既存のタイムスタンプの上書き
             if ($OverWrite) {
                 $filename = (& "${PSScriptRoot}/Remove-Timestamp.ps1" $file.Name -Format $Format -Prefix $Prefix)
                 $filebase = Split-Path -LeafBase $filename
-            } else {
+            }
+            else {
                 $filebase = $file.BaseName
             }
             # コピーファイルパスの作成
@@ -85,11 +85,7 @@ process {
             # ShouldProcessで表示する処理対象
             $targetVerbose = "Item: ${target} Destination: ${newFilePath}"
             # ShouldProcessで表示する操作
-            $operation = if ($file.PSIsContainer) { 
-                "Rename Directory with Timestamp"
-            } else {
-                "Rename File with Timestamp"
-            }
+            $operation = "Rename {0} with Timestamp" -f $(if ($file.PSIsContainer) { "Directory" } else { "File" })
             if ($PSCmdlet.ShouldProcess($targetVerbose, $operation)) {
                 Rename-Item -LiteralPath $target -NewName $newFilePath
             }
