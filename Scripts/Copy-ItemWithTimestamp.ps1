@@ -71,42 +71,44 @@ process {
         }
         foreach ($target in $targets) {
             $file = Get-Item -LiteralPath $target
-            $processName = if ($file.PSIsContainer) { 
+            # コピー先の設定
+            if ($null -eq $PSBoundParameters.Destination) {
+                $folder = Split-Path -Path $file -Parent
+            } else {
+                $folder = $Destination
+            }
+            # タイムスタンプの種類
+            if ($TimestampType -eq "CurrentTime") {
+                $timestamp = $currentTime
+            } elseif ($TimestampType -eq "WriteTime") {
+                $timestamp = $file.LastWriteTime.ToString($Format)
+            } elseif ($TimestampType -eq "AccessTime") {
+                $timestamp = $file.LastAccessTime.ToString($Format)
+            } elseif ($TimestampType -eq "CreationTime") {
+                $timestamp = $file.CreationTime.ToString($Format)
+            }
+            # ファイル名の既存のタイムスタンプの上書き
+            if ($OverWrite) {
+                $filename = (& "${PSScriptRoot}/Remove-Timestamp.ps1" $file.Name -Format $Format -Prefix $Prefix)
+                $filebase = Split-Path -LeafBase $filename
+            } else {
+                $filebase = $file.BaseName
+            }
+            # コピーファイルパスの作成
+            $newFilePath = [System.IO.Path]::Combine(
+                $folder, 
+                $filebase + $Prefix + $timestamp + $file.Extension
+            )
+            # ShouldProcessで表示する処理対象
+            $targetVerbose = "Item: ${target} Destination: ${newFilePath}"
+            # ShouldProcessで表示する操作
+            $operator = if ($file.PSIsContainer) { 
                 "Copy Directory with Timestamp"
             } else {
                 "Copy File with Timestamp"
             }
-            if ($PSCmdlet.ShouldProcess($target, $processName)) {
-                
-                # コピー先の設定
-                if ($null -eq $PSBoundParameters.Destination) {
-                    $folder = Split-Path -Path $file -Parent
-                } else {
-                    $folder = $Destination
-                }
-                # タイムスタンプの種類
-                if ($TimestampType -eq "CurrentTime") {
-                    $timestamp = $currentTime
-                } elseif ($TimestampType -eq "WriteTime") {
-                    $timestamp = $file.LastWriteTime.ToString($Format)
-                } elseif ($TimestampType -eq "AccessTime") {
-                    $timestamp = $file.LastAccessTime.ToString($Format)
-                } elseif ($TimestampType -eq "CreationTime") {
-                    $timestamp = $file.CreationTime.ToString($Format)
-                }
-                # ファイル名の既存のタイムスタンプの上書き
-                if ($OverWrite) {
-                    $filename = (& "${PSScriptRoot}/Remove-Timestamp.ps1" $file.Name -Format $Format -Prefix $Prefix)
-                    $filebase = Split-Path -LeafBase $filename
-                } else {
-                    $filebase = $file.BaseName
-                }
-                # コピーファイルパスの作成
-                $new_file_path = [System.IO.Path]::Combine(
-                    $folder, 
-                    $filebase + $Prefix + $timestamp + $file.Extension
-                )
-                Copy-Item -LiteralPath $target $new_file_path -Recurse
+            if ($PSCmdlet.ShouldProcess($targetVerbose, $operator)) {
+                Copy-Item -LiteralPath $target $newFilePath -Recurse
             }
         }
     }
