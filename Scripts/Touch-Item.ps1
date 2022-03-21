@@ -153,34 +153,30 @@ begin {
 process {
     $InputPath = if ($PSBoundParameters.ContainsKey('Path')) { $Path } else { $LiteralPath }
     foreach ($p in $InputPath) {
-        $targets = @()
         try {
-            if ($PSBoundParameters.ContainsKey('Path')) {
-                $targets = Convert-Path -Path $p -ErrorAction Stop
-            }
-            else {
-                $targets = Convert-Path -LiteralPath $p -ErrorAction Stop
-            }
+            $param = @{ $PSCmdlet.ParameterSetName = $p }
+            $targets = @(Convert-Path @param -ErrorAction Stop)
         } catch [System.Management.Automation.ItemNotFoundException] {
             # itemが見つからない場合は新規ファイルを作成するため、絶対パスに変換する
             $parent = Split-Path -Path $p -Parent
             $child = Split-Path -Path $p -Leaf
             if (Test-Path -LiteralPath $parent -PathType Container) {
-                $targets += Join-Path -Path (Convert-Path $parent) -ChildPath $child
+                $targets = @(Join-Path -Path (Convert-Path $parent) -ChildPath $child)
             }
             else {
-                $targets += Join-Path -Path (Get-Location) -ChildPath $child
+                $targets = @(Join-Path -Path (Get-Location) -ChildPath $child)
             }
         } catch {
             Write-Error $_.Exception.Message -ErrorAction Continue
             if ($ErrorActionPreference -eq "Stop") {
                 return
             }
+            $targets = @()
         }
         foreach ($target in $targets) {
             if (Test-Path -LiteralPath $target -PathType Any) {
                 $file = Get-Item -LiteralPath $target
-                $operation = "Change {0} Timestamp" -f $(if($file){ "File" }else{ "Directory" })
+                $operation = "Change {0} Timestamp" -f $(if($file.PSIsContainer){ "File" }else{ "Directory" })
             } else {
                 if ($NoCreate) {
                     $operation = "Do Nothing (because -NoCreate is enabled)"

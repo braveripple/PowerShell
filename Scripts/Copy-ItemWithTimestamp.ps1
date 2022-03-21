@@ -50,20 +50,16 @@ begin {
 process {
     $InputPath = if ($PSBoundParameters.ContainsKey('Path')) { $Path } else { $LiteralPath }
     foreach ($p in $InputPath) {
-        $targets = @()
         try {
-            if ($PSBoundParameters.ContainsKey('Path')) {
-                $targets = Convert-Path -Path $p -ErrorAction Stop
-            }
-            else {
-                $targets = Convert-Path -LiteralPath $p -ErrorAction Stop
-            }
+            $param = @{ $PSCmdlet.ParameterSetName = $p }
+            $targets = @(Convert-Path @param -ErrorAction Stop)
         }
         catch {
             Write-Error $_.Exception.Message -ErrorAction Continue
             if ($ErrorActionPreference -eq "Stop") {
                 return
             }
+            $targets = @()
         }
         foreach ($target in $targets) {
             $file = Get-Item -LiteralPath $target
