@@ -1,6 +1,8 @@
-# SendToスクリプトの引数を高度な関数に渡すときは`Get-Item -LiteralPath`でファイル名解決する。
-# そうするとパイプを使って１度に処理を渡すことができる。
-$resolvePaths = foreach ($arg in $Args) {
-    Get-Item -LiteralPath $arg
-}
-$resolvePaths | ../Touch-Item.ps1
+# ファイルの更新日時を更新する
+$timestamp = Get-Date
+Get-Item -LiteralPath $Args | 
+    ForEach-Object {
+        $_.LastAccessTime = $timestamp
+        $_.LastWriteTime = $timestamp
+    }
+

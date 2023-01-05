@@ -1,10 +1,6 @@
-# アイテムにタイムスタンプを付ける
-$resolvePaths = foreach ($arg in $Args) {
-    Get-Item -LiteralPath $arg
-}
-$resolvePaths | 
-    ../Rename-ItemWithTimestamp.ps1 `
-        -Format "yyyyMMddHHmmss" `
-        -Prefix "_" `
-        -OverWrite
-
+# ファイル名にタイムスタンプを付与してリネーム
+$timestamp = Get-Date -Format "yyyyMMddHHmmss"
+Get-Item -LiteralPath $Args | 
+    Rename-Item -NewName { 
+        $_.BaseName + "_" + $timestamp + $_.Extension
+    }

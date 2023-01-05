@@ -1,10 +1,5 @@
-# アイテムにファイルの更新日時を付ける
-$resolvePaths = foreach ($arg in $Args) {
-    Get-Item -LiteralPath $arg
-}
-$resolvePaths | 
-    ../Rename-ItemWithTimestamp.ps1 `
-        -Format "yyyyMMddHHmmss" `
-        -Prefix "_" `
-        -TimestampType WriteTime `
-        -OverWrite
+# ファイル名に更新日時を付与してリネーム
+Get-Item -LiteralPath $Args | 
+    Rename-Item -NewName { 
+        $_.BaseName + "_" + $_.LastWriteTime.ToString("yyyyMMddHHmmss") + $_.Extension 
+    }

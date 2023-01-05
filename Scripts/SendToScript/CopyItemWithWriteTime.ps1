@@ -1,10 +1,6 @@
-# ファイルの更新日時を付けてアイテムをその場にコピーする
-$resolvePaths = foreach ($arg in $Args) {
-    Get-Item -LiteralPath $arg
-}
-$resolvePaths | 
-    ../Copy-ItemWithTimestamp.ps1 `
-        -Format "yyyyMMddHHmmss" `
-        -Prefix "_" `
-        -TimestampType WriteTime `
-        -OverWrite
+# ファイル名に更新日時を付与してその場にコピー
+Get-Item -LiteralPath $Args | 
+    ForEach-Object {
+        $copyPath = $_.DirectoryName + "/" + $_.BaseName + "_" + $_.LastWriteTime.ToString("yyyyMMddHHmmss") + $_.Extension
+        Copy-Item -LiteralPath $_ -Destination $copyPath -WhatIf
+    }

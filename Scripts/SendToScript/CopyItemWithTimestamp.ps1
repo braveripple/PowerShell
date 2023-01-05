@@ -1,9 +1,7 @@
-# タイムスタンプを付けてアイテムをその場にコピーする
-$resolvePaths = foreach ($arg in $Args) {
-    Get-Item -LiteralPath $arg
-}
-$resolvePaths | 
-    ../Copy-ItemWithTimestamp.ps1 `
-        -Format "yyyyMMddHHmmss" `
-        -Prefix "_" `
-        -OverWrite
+# ファイル名にタイムスタンプを付与してその場にコピー
+$timestamp = Get-Date -Format "yyyyMMddHHmmss"
+Get-Item -LiteralPath $Args | 
+    ForEach-Object {
+        $copyPath = $_.DirectoryName +"/"+ $_.BaseName + "_" + $timestamp + $_.Extension
+        Copy-Item -LiteralPath $_ -Destination $copyPath
+    }
