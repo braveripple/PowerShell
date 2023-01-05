@@ -54,7 +54,7 @@ $scriptInfo = @(
         PowerShellWindowStyle=[WindowStyle]::Normal
     },
     [PSCustomObject]@{
-        Name="アイテム名をクリップボードにコピー"
+        Name="パスとしてコピーEX"
         Path=".\CopyItemNameToClipBoard.ps1"
         Icon="📋"
         WindowStyle=[WindowStyle]::Hidden
@@ -68,53 +68,46 @@ $scriptInfo = @(
         PowerShellWindowStyle=[WindowStyle]::Hidden
     },
     [PSCustomObject]@{
-        Name="タイムスタンプを付与してコピー"
+        Name="その場でコピー(タイムスタンプ付与)"
         Path=".\CopyItemWithTimestamp.ps1"
         Icon="🕒"
         WindowStyle=[WindowStyle]::Hidden
         PowerShellWindowStyle=[WindowStyle]::Hidden
     },
     [PSCustomObject]@{
-        Name="タイムスタンプを付与してリネーム"
+        Name="その場でリネーム(タイムスタンプ付与)"
         Path=".\RenameItemWithTimestamp.ps1"
         Icon="🕒"
         WindowStyle=[WindowStyle]::Hidden
         PowerShellWindowStyle=[WindowStyle]::Hidden
     },
     [PSCustomObject]@{
-        Name="更新日時を付与してコピー"
+        Name="その場でコピー(更新日時付与)"
         Path=".\CopyItemWithWriteTime.ps1"
         Icon="🕒"
         WindowStyle=[WindowStyle]::Hidden
         PowerShellWindowStyle=[WindowStyle]::Hidden
     },
     [PSCustomObject]@{
-        Name="更新日時を付与してリネーム"
+        Name="その場でリネーム(更新日時付与)"
         Path=".\RenameItemWithWriteTime.ps1"
         Icon="🕒"
         WindowStyle=[WindowStyle]::Hidden
         PowerShellWindowStyle=[WindowStyle]::Hidden
     },
     [PSCustomObject]@{
-        Name="ファイルのハッシュ値を調べる"
+        Name="ハッシュ値を調べる"
         Path=".\FileHashViewer.ps1"
         Icon="🔍"
         WindowStyle=[WindowStyle]::Hidden
         PowerShellWindowStyle=[WindowStyle]::Normal
     },
     [PSCustomObject]@{
-        Name="ファイルの文字コードを調べる"
+        Name="文字コードを調べる"
         Path=".\FileEncodingViewer.ps1"
         Icon="🔍"
         WindowStyle=[WindowStyle]::Hidden
         PowerShellWindowStyle=[WindowStyle]::Normal
-    },
-    [PSCustomObject]@{
-        Name="タイムスタンプを付与してバックアップ"
-        Path=".\CopyItemWithTimestampToBackupDirectory.ps1"
-        Icon="💾"
-        WindowStyle=[WindowStyle]::Hidden
-        PowerShellWindowStyle=[WindowStyle]::Hidden
     }
 )
 
