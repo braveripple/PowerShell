@@ -1,5 +1,6 @@
 # コンソールに表示するだけ
-foreach ($arg in $Args) {
-    Write-Host $arg
-}
+Write-Host $Args -Separator "`n"
+Write-Host ""
+Get-Item -LiteralPath $Args
+Write-Host ""
 pause
