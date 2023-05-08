@@ -111,9 +111,11 @@ param (
 )
 begin {
     if ($PSBoundParameters.ContainsKey('Reference') -and $PSBoundParameters.ContainsKey('DateTime')) {
+        # ReferenceパラメーターとDateTimeパラメーターの同時指定は不可
         throw "cannot specify times from more than one source"
     }
     elseif ($PSBoundParameters.ContainsKey('Reference')) {
+        # Referenceパラーメーター指定時、ファイルやディレクトリが存在しない場合エラー
         if (!(Test-Path -LiteralPath $Reference -PathType Any)) {
             throw "failed to get attlibutes of '${Reference}': No such file or directory"
         }
@@ -123,11 +125,13 @@ begin {
         $creationTime = $referenceFile.CreationTime
     }
     elseif ($PSBoundParameters.ContainsKey('DateTime')) {
+        # DateTimeパラメーター指定時、指定日時で更新
         $lastWriteTime = $DateTime
         $lastAccessTime = $DateTime
         $creationTime = $DateTime
     }
     else {
+        # ReferenceパラメーターとDateTimeパラメーターを両方指定していない場合はコマンド実行日時で更新
         $timestamp = Get-Date
         $lastWriteTime = $timestamp
         $lastAccessTime = $timestamp
@@ -135,6 +139,7 @@ begin {
     }
 
     if ((!$AccessTimeUpdate) -and (!$WriteTimeUpdate) -and (!$CreationTimeUpdate)) {
+        # 上記パラメーター未指定時、アクセス日時と更新日時を更新する
         $AccessTimeUpdate = $True
         $WriteTimeUpdate = $True
     }
