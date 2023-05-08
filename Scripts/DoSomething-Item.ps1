@@ -87,7 +87,7 @@ Process {
             }
         }
     }
-} 
+}
 End {
     Write-Verbose "End"
     cleanUp
