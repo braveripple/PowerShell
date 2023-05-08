@@ -15,7 +15,7 @@ param (
         ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True)]
     [string[]]$LiteralPath
 )
-begin {
+Begin {
     # リソースの準備はBegin句で行う。
     # リソースの準備に失敗した場合普通はプログラム続行不可なのでexitで終了する。
     Write-Verbose "Begin"
@@ -32,7 +32,6 @@ begin {
         catch {
             Write-Error "リソースの開放中にエラーが発生しました"
         }
-    }
 
     Write-Output "*リソースの準備*"
     try {
@@ -46,7 +45,7 @@ begin {
     }
 
 }
-process {
+Process {
     Write-Verbose "Process"
     $InputPath = if ($PSBoundParameters.ContainsKey('Path')) { $Path } else { $LiteralPath }
     $targets = @()
@@ -89,7 +88,7 @@ process {
         }
     }
 } 
-end {
+End {
     Write-Verbose "End"
     cleanUp
 }
