@@ -32,6 +32,7 @@ Begin {
         catch {
             Write-Error "リソースの開放中にエラーが発生しました"
         }
+    }
 
     Write-Output "*リソースの準備*"
     try {
