@@ -15,7 +15,7 @@ param (
         ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True)]
     [string[]]$LiteralPath
 )
-Begin {
+begin {
     # リソースの準備はBegin句で行う。
     # リソースの準備に失敗した場合普通はプログラム続行不可なのでexitで終了する。
     Write-Verbose "Begin"
@@ -46,8 +46,11 @@ Begin {
     }
 
 }
-Process {
+process {
     Write-Verbose "Process"
+    ################
+    # パス加工処理
+    ################
     $InputPath = if ($PSBoundParameters.ContainsKey('Path')) { $Path } else { $LiteralPath }
     $targets = @()
     foreach ($p in $InputPath) {
@@ -59,6 +62,7 @@ Process {
             $targets += $convertPath
         }
         catch {
+            # 指定したパスが見つからないときはエラーとする
             Write-Error $_.Exception.Message -ErrorAction Continue
             if ($ErrorActionPreference -eq "Stop") {
                 # 呼び出し元の-ErrorActionがStopの場合、処理を打ち切る
@@ -70,7 +74,7 @@ Process {
     # メイン処理
     ################
     foreach ($target in $targets) {
-        if ($PSCmdlet.ShouldProcess($target, 'something')) {
+        if ($PSCmdlet.ShouldProcess($target, 'Do')) {
             try {
                 Write-Output "'$target':何かの処理をする"
                 # ファイル名が"hoge.txt"のとき意図的にエラーを起こす
@@ -89,7 +93,7 @@ Process {
         }
     }
 }
-End {
+end {
     Write-Verbose "End"
     cleanUp
 }
