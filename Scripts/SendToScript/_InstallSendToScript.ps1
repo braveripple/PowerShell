@@ -1,4 +1,13 @@
-﻿$PowerShellPath = "C:\Program Files\PowerShell\7\pwsh.exe"
+# SendToに以下ショートカットを作成する
+# コンソールに表示
+# パスとしてコピーEX
+# 更新日時を更新
+# その場でコピー(タイムスタンプ付与)
+# その場でリネーム(タイムスタンプ付与)
+# その場でコピー(更新日時付与)
+# 文字コードを調べる...(※要nkf32.exe)
+
+$PowerShellPath = "$PSHOME\pwsh.exe"
 enum WindowStyle {
     Normal = 1
     Minimized = 7
@@ -121,5 +130,8 @@ $scriptInfo | ForEach-Object {
         iconLocation = $iconMap[$_.Icon]
         powershellWindowStyle = $_.PowerShellWindowStyle
     }
+    Write-Host "インストール開始：「$($_.Icon)$($_.Name)（$($_.Path)）」"
     createSendToScriptShortcut @parameter
+    Write-Host "インストール完了：「$($_.Icon)$($_.Name)（$($_.Path)）」"
 }
+pause
