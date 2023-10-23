@@ -1,3 +1,4 @@
+# マウスの座標をリアルタイム表示するだけ
 Add-Type -AssemblyName System.Windows.Forms
 
 # 画面サイズの横幅から表示桁数を取得
